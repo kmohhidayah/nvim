@@ -33,8 +33,8 @@ local function enforce_buffer_limit()
         end
     end
 
-    -- If buffer count exceeds 4, close the oldest buffer
-    if buffer_count > 4 then
+    -- If buffer count exceeds 10, close the oldest buffer
+    if buffer_count > 10 then
         close_oldest_buffer()
     end
 end

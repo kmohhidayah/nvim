@@ -35,9 +35,12 @@ require("lazy").setup({
   },
   -- Configure any other settings here. See the documentation for more details.
   -- colorscheme that will be used when installing plugins.
-  install = { colorscheme = { "habamax" } },
+  install = { colorscheme = { "onedark" } },
   -- automatically check for plugin updates
   checker = { enabled = true },
 })
 
-vim.cmd("colorscheme onedark_dark")
+vim.cmd("colorscheme onedark")
+vim.g.neovide_font_ligatures = false
+vim.opt.guifont = "JetBrains Mono NL:h14"
+vim.g.neovide_transparency = 0.9

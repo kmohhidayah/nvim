@@ -6,16 +6,48 @@ return {
     -- event = 'VeryLazy',
     ft = { 'org' },
     config = function()
+      -- Fungsi untuk penomoran incremental
+      local function get_next_howto_filename()
+        local directory = '~/OrgDoc/howto/'
+        local pattern = 'howto_(%d+).org' -- Support for more than two digits
+        local max_num = -1
+
+        -- Open directory and iterate over all files
+        local handle = io.popen('ls ' .. directory)
+        if handle then       -- Check if handle is not nil
+          for filename in handle:lines() do
+            if filename then -- Check if filename is not nil
+              local num = filename:match(pattern)
+              if num then
+                local num_int = tonumber(num)
+                if num_int and num_int > max_num then
+                  max_num = num_int
+                end
+              end
+            end
+          end
+          handle:close()
+        end
+
+        -- Increment the highest number found
+        local next_num = max_num + 1
+
+        -- Adjust format based on the number
+        if next_num < 100 then
+          return string.format('howto_%02d.org', next_num)
+        else
+          return string.format('howto_%03d.org', next_num)
+        end
+      end
+
       -- Setup orgmode
       require('orgmode').setup({
         org_agenda_files = '~/OrgDoc/**/*',
         org_default_notes_file = '~/OrgDoc/refile.org',
         org_agenda_skip_deadline_if_done = true,
-        -- win_split_mode = { 'float', 0.7 },
-        -- win_border = { '╔', '═', '╗', '║', '╝', '═', '╚', '║' },
         org_todo_keywords = {
           'TODO(t)', 'IN-PROGRESS(i)', 'WAITING(w)', '|', 'DONE(d)', 'CANCELED(c)',
-          'REPORT(r)', 'BUG(b)', 'KNOWNCAUSE(k)', '|', 'FIXED(f)',
+          'REPORT(r)', 'BUG(b)', 'KNOWNCAUSE(k)','HOW-TO', '|', 'FIXED(f)',
         },
         org_todo_keyword_faces = {
           TODO = ':background #E06C75 :foreground #282C34 :weight bold',        -- Merah terang dengan latar belakang gelap
@@ -30,7 +62,7 @@ return {
         },
         org_capture_templates = {
           t = {
-            description = 'Todo with Priority and Deadline',
+            description = 'Task',
             template = '* TODO [#A] %?\n  DEADLINE: %^{Name}t',
             target = '~/OrgDoc/todo/todos.org', --string.format('~/OrgDoc/todo/todo_%s.org', os.date('%Y%m%d_%H%M'))
           },
@@ -41,7 +73,7 @@ return {
           },
           j = {
             description = 'Daily Journal',
-            template = '* %T - %^{Mood} \n\n** What Happened Today:\n%?\n\n** Reflection:\n',
+            template = '* %t - What Happened Today:\n%?\n\n** Reflection:\n',
             target = string.format('~/OrgDoc/journal/journal_%s.org', os.date('%Y%m%d'))
           },
           n = {
@@ -56,8 +88,8 @@ return {
           },
           h = {
             description = 'How To',
-            template = '** %T - How To: %^{Title} \n\n*** Description\n%?\n\n*** Steps\n- ',
-            target = '~/OrgDoc/howto.org', -- Path ke file tempat menyimpan catatan 'How To'
+            template = '#+ Author: kmohhidayah\n#+ Created_at: %t\n#+ Updated_at: \n\n* HOW-TO: %^{name}\n\n** Description\n\n** Steps\n- ',
+            target = '~/OrgDoc/howto/' .. get_next_howto_filename(),
           }
         },
       })
@@ -65,7 +97,7 @@ return {
       -- NOTE: If you are using nvim-treesitter with ~ensure_installed = "all"~ option
       -- add ~org~ to ignore_install
       require('nvim-treesitter.configs').setup({
-        ensure_installed = {"go","lua"},
+        ensure_installed = { "go", "lua" },
         ignore_install = { 'org' },
       })
     end,
